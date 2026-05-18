@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>이모티콘 스티커 생성기</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+  <!-- API 키 모달 -->
+  <div class="modal" id="apiModal">
+    <div class="modal-content">
+      <h2>Gemini API 키 설정</h2>
+      <p class="modal-desc">AI 스티커 생성을 위해 Gemini API 키를 입력해주세요.</p>
+      <input type="password" id="apiKeyInput" class="api-input" placeholder="API 키를 입력하세요" />
+      <div class="save-options">
+        <label class="radio-label">
+          <input type="radio" name="saveOption" value="session" checked />
+          <span>1회성 저장 (탭을 닫으면 삭제)</span>
+        </label>
+        <label class="radio-label">
+          <input type="radio" name="saveOption" value="persistent" />
+          <span>브라우저에 저장 (계속 사용)</span>
+        </label>
+      </div>
+      <div class="modal-buttons">
+        <button class="btn-modal" id="apiConfirmBtn">검증 후 저장</button>
+        <button class="btn-modal btn-modal-cancel" id="apiCancelBtn">취소</button>
+      </div>
+      <div class="validation-status" id="validationStatus" style="display:none">
+        <p class="validation-message" id="validationMessage"></p>
+      </div>
+      <p class="modal-note">⚠️ API 키는 브라우저에만 저장되며, 외부로 전송되지 않습니다.</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <header>
+      <div class="header-top">
+        <h1>이모티콘 스티커 생성기</h1>
+        <button class="btn-api-settings" id="apiSettingsBtn">⚙️ API 설정</button>
+      </div>
+      <p class="subtitle">인물 사진을 업로드하면 AI가 카카오톡 스티커를 만들어 드립니다</p>
+    </header>
+
+    <!-- 업로드 섹션 -->
+    <section class="upload-section" id="uploadSection">
+      <div class="drop-zone" id="dropZone">
+        <div class="drop-icon">&#128247;</div>
+        <p class="drop-text">사진을 드래그하거나 클릭하여 업로드</p>
+        <p class="drop-hint">PNG, JPG, WEBP · 최대 20MB</p>
+        <input type="file" id="fileInput" accept=".png,.jpg,.jpeg,.webp" hidden />
+      </div>
+      <div class="preview-wrap" id="previewWrap" style="display:none">
+        <img id="previewImg" src="" alt="미리보기" />
+        <button class="btn-reset" id="resetBtn">다른 사진 선택</button>
+      </div>
+      <div class="sticker-count-selector" id="stickerSelector" style="display:none">
+        <label for="stickerCountSlider">스티커 개수 선택</label>
+        <div class="slider-container">
+          <input type="range" id="stickerCountSlider" min="12" max="16" value="14" />
+          <span class="slider-value" id="sliderValue">14</span>개
+        </div>
+      </div>
+      <button class="btn-generate" id="generateBtn" disabled>스티커 생성하기</button>
+    </section>
+
+    <!-- 로딩 섹션 -->
+    <section class="loading-section" id="loadingSection" style="display:none">
+      <div class="spinner"></div>
+      <p class="loading-msg" id="loadingMsg">AI가 스티커를 생성하고 있습니다...</p>
+      <p class="loading-hint">Gemini AI 이미지 생성에 30~60초가 소요될 수 있습니다</p>
+    </section>
+
+    <!-- 에러 섹션 -->
+    <section class="error-section" id="errorSection" style="display:none">
+      <div class="error-box">
+        <p class="error-title">오류가 발생했습니다</p>
+        <p class="error-msg" id="errorMsg"></p>
+        <button class="btn-generate" id="retryBtn">다시 시도</button>
+      </div>
+    </section>
+
+    <!-- 결과 섹션 -->
+    <section class="result-section" id="resultSection" style="display:none">
+      <!-- 그리드 이미지 -->
+      <div class="result-block">
+        <div class="result-header">
+          <h2>그리드 이미지</h2>
+          <a class="btn-download" id="gridDownloadBtn" href="#" download="sticker_grid.png">다운로드</a>
+        </div>
+        <div class="grid-preview">
+          <img id="gridImg" src="" alt="그리드 이미지" />
+        </div>
+      </div>
+
+      <!-- 개별 스티커 -->
+      <div class="result-block">
+        <div class="result-header">
+          <h2>개별 스티커 <span id="stickerCount"></span></h2>
+          <a class="btn-download btn-zip" id="zipDownloadBtn" href="#">전체 ZIP 다운로드</a>
+        </div>
+        <div class="sticker-grid" id="stickerGrid"></div>
+      </div>
+
+      <button class="btn-new" id="newBtn">새 사진으로 다시 만들기</button>
+    </section>
+  </div>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
