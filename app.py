@@ -14,8 +14,13 @@ app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 20 * 1024 * 1024  # 20MB
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-UPLOAD_DIR = os.path.join(BASE_DIR, 'uploads')
-OUTPUT_DIR = os.path.join(BASE_DIR, 'output')
+# Vercel은 /tmp에만 쓰기 권한 있음
+if os.environ.get('FLASK_ENV') == 'production':
+    UPLOAD_DIR = '/tmp/uploads'
+    OUTPUT_DIR = '/tmp/output'
+else:
+    UPLOAD_DIR = os.path.join(BASE_DIR, 'uploads')
+    OUTPUT_DIR = os.path.join(BASE_DIR, 'output')
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -238,4 +243,6 @@ def download_all(session_id):
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    import os
+    debug = os.environ.get('FLASK_ENV') != 'production'
+    app.run(debug=debug, host='0.0.0.0', port=5000)
