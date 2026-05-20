@@ -13,6 +13,16 @@
       <h2>Gemini API 키 설정</h2>
       <p class="modal-desc">AI 스티커 생성을 위해 Gemini API 키를 입력해주세요.</p>
       <input type="password" id="apiKeyInput" class="api-input" placeholder="API 키를 입력하세요" />
+
+      <div class="model-selector">
+        <label for="modelSelect">이미지 생성 모델 선택</label>
+        <select id="modelSelect" class="model-select">
+          <option value="gemini-2.5-flash-image">Gemini 2.5 Flash (기본)</option>
+          <option value="gemini-3-pro-image-preview">Nano Banana Pro</option>
+          <option value="gemini-3.1-flash-image-preview">Nano Banana 2</option>
+        </select>
+      </div>
+
       <div class="save-options">
         <label class="radio-label">
           <input type="radio" name="saveOption" value="session" checked />
@@ -48,8 +58,8 @@
       <div class="drop-zone" id="dropZone">
         <div class="drop-icon">&#128247;</div>
         <p class="drop-text">사진을 드래그하거나 클릭하여 업로드</p>
-        <p class="drop-hint">PNG, JPG, WEBP · 최대 20MB</p>
-        <input type="file" id="fileInput" accept=".png,.jpg,.jpeg,.webp" hidden />
+        <p class="drop-hint">PNG, JPG, WEBP, GIF, BMP, TIFF · 최대 20MB</p>
+        <input type="file" id="fileInput" accept=".png,.jpg,.jpeg,.webp,.gif,.bmp,.tiff,.tif" hidden />
       </div>
       <div class="preview-wrap" id="previewWrap" style="display:none">
         <img id="previewImg" src="" alt="미리보기" />

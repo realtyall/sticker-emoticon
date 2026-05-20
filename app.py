@@ -25,7 +25,7 @@ else:
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-ALLOWED_EXTENSIONS = {'.png', '.jpg', '.jpeg', '.webp'}
+ALLOWED_EXTENSIONS = {'.png', '.jpg', '.jpeg', '.webp', '.gif', '.bmp', '.tiff', '.tif'}
 
 def generate_sticker_prompt(sticker_count):
     emotions = [
@@ -75,17 +75,22 @@ def validate_key():
         from google import genai
 
         client = genai.Client(api_key=api_key)
-        # 간단한 텍스트 생성으로 API 키 유효성 확인
-        response = client.models.generate_content(
-            model='gemini-2.0-flash',
-            contents='test'
-        )
-        return jsonify({'valid': True, 'message': 'API 키가 유효합니다.'})
+        # 모델 리스트 조회로 API 키 유효성 확인 (비용 없음)
+        models = list(client.models.list())
+        if models:
+            return jsonify({'valid': True, 'message': 'API 키가 유효합니다.'})
+        else:
+            return jsonify({'valid': False, 'error': '유효하지 않은 API 키입니다.'}), 400
     except Exception as e:
         error_msg = str(e)
-        if 'API key' in error_msg or 'authentication' in error_msg.lower():
-            return jsonify({'valid': False, 'error': '유효하지 않은 API 키입니다.'}), 400
-        return jsonify({'valid': False, 'error': f'검증 중 오류: {error_msg}'}), 500
+        print(f"API Validation Error: {error_msg}")
+
+        if 'API key' in error_msg or 'authentication' in error_msg.lower() or 'unauthenticated' in error_msg.lower():
+            return jsonify({'valid': False, 'error': '유효하지 않은 API 키입니다. Google AI Studio에서 API 키를 확인하세요.'}), 400
+        elif 'not found' in error_msg.lower():
+            return jsonify({'valid': False, 'error': 'API 키 형식이 올바르지 않습니다.'}), 400
+        else:
+            return jsonify({'valid': False, 'error': f'검증 중 오류: {error_msg}'}), 500
 
 
 @app.route('/api/generate', methods=['POST'])
@@ -112,6 +117,11 @@ def generate():
     if not api_key:
         return jsonify({'error': 'API 키가 필요합니다.'}), 400
 
+    model_name = request.form.get('model_name', 'gemini-2.5-flash-image')
+    valid_models = ['gemini-2.5-flash-image', 'gemini-3-pro-image-preview', 'gemini-3.1-flash-image-preview']
+    if model_name not in valid_models:
+        model_name = 'gemini-2.5-flash-image'
+
     session_id = uuid.uuid4().hex
     paths = _session_paths(session_id)
     upload_dir = os.path.join(UPLOAD_DIR, session_id)
@@ -131,23 +141,20 @@ def generate():
         from google import genai
         from google.genai import types
 
-        client = genai.Client(api_key=api_key, http_options={"api_version": "v1"})
+        client = genai.Client(api_key=api_key, http_options={"api_version": "v1beta"})
 
         with open(ref_path, 'rb') as f:
             image_bytes = f.read()
 
         sticker_prompt = generate_sticker_prompt(sticker_count)
         response = client.models.generate_content(
-            model='gemini-2.0-flash-preview-image-generation',
+            model=model_name,
             contents=[
                 types.Content(parts=[
                     types.Part.from_bytes(data=image_bytes, mime_type=mime_type),
                     types.Part.from_text(text=sticker_prompt),
                 ])
             ],
-            config=types.GenerateContentConfig(
-                response_modalities=['IMAGE', 'TEXT']
-            ),
         )
 
         grid_image_data = None

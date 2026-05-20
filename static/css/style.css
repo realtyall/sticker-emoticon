@@ -49,6 +49,34 @@ body {
   transition: border-color 0.2s;
 }
 .api-input:focus { outline: none; border-color: #0071e3; }
+.model-selector {
+  margin-bottom: 24px;
+}
+.model-selector label {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: #1d1d1f;
+}
+.model-select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #d1d1d6;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  background-color: #fff;
+  transition: border-color 0.2s;
+  font-family: inherit;
+}
+.model-select:focus {
+  outline: none;
+  border-color: #0071e3;
+}
+.model-select:hover {
+  border-color: #a1a1a6;
+}
 .save-options {
   display: flex;
   flex-direction: column;

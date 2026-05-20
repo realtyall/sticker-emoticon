@@ -3,6 +3,7 @@
   const apiModal = document.getElementById('apiModal');
   const apiSettingsBtn = document.getElementById('apiSettingsBtn');
   const apiKeyInput = document.getElementById('apiKeyInput');
+  const modelSelect = document.getElementById('modelSelect');
   const apiConfirmBtn = document.getElementById('apiConfirmBtn');
   const apiCancelBtn = document.getElementById('apiCancelBtn');
   const validationStatus = document.getElementById('validationStatus');
@@ -37,17 +38,24 @@
 
   let selectedFile = null;
   let currentApiKey = null;
+  let currentModel = 'gemini-2.5-flash-image';
 
-  // API 키 관리
+  // API 키 및 모델 관리
   function loadApiKey() {
     const saved = localStorage.getItem('gemini_api_key');
     if (saved) {
       currentApiKey = saved;
     }
+    const savedModel = localStorage.getItem('model_name');
+    if (savedModel) {
+      currentModel = savedModel;
+      modelSelect.value = savedModel;
+    }
   }
 
   function showApiModal() {
     apiKeyInput.value = currentApiKey || '';
+    modelSelect.value = currentModel;
     validationStatus.style.display = 'none';
     apiConfirmBtn.disabled = false;
     apiModal.classList.remove('hidden');
@@ -61,8 +69,10 @@
 
   function saveApiKey(apiKey, persistent) {
     currentApiKey = apiKey;
+    currentModel = modelSelect.value;
     if (persistent) {
       localStorage.setItem('gemini_api_key', apiKey);
+      localStorage.setItem('model_name', currentModel);
     }
     hideApiModal();
   }
@@ -199,6 +209,7 @@
     formData.append('image', selectedFile);
     formData.append('sticker_count', stickerCountSlider.value);
     formData.append('api_key', currentApiKey);
+    formData.append('model_name', currentModel);
 
     try {
       const response = await fetch('/api/generate', {
